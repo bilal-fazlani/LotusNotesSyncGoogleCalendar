@@ -58,7 +58,7 @@ namespace EmailParserForCalendar
             return message;
         }
         
-        public static IEnumerable<Message> GetRecentMessages(string lotusNotesSourceEmailAddress, long? maxMessages = 5, int? maxDays = 5)
+        public static IEnumerable<Message> GetRecentMessages(string lotusNotesSourceEmailAddress, long maxMessages = 5, int maxDays = 5)
         {
             IList<Message> messages = null;
 
@@ -71,8 +71,10 @@ namespace EmailParserForCalendar
                 request.Q = $"from:{lotusNotesSourceEmailAddress} newer_than:{maxDays}d";
 
                 messages = request.Execute().Messages;
-                
-                Console.WriteLine($"{messages.Count} messages fetched from Goodle for the last {maxDays} days");
+
+                Console.WriteLine(messages == null
+                    ? "No messages returned from server"
+                    : $"{messages.Count} messages fetched from Google for the last {maxDays} days");
             }
             catch (Exception ex)
             {

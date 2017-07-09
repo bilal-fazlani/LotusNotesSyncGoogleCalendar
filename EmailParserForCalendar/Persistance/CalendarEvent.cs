@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using EmailParserForCalendar.Exceptions;
 
@@ -11,7 +13,7 @@ namespace EmailParserForCalendar.Persistance
         {
             
         }
-        
+                
         public CalendarEvent(ForwardedEmail email)
         {
             Match match = RegexParser.Parse(email.Subject);
@@ -23,7 +25,7 @@ namespace EmailParserForCalendar.Persistance
                 {
                     People = match.Groups[4].Value.Trim();
                     //TODO: extract timezone
-                    EventDate = DateTimeOffset.Parse(match.Groups[5].Value.Trim());
+                    EventDate = Parse(match.Groups[5].Value.Trim(), match.Groups[7].Value.Trim());
                     MiscInformation = match.Groups[8].Value;
                     break;
                 }
@@ -33,17 +35,42 @@ namespace EmailParserForCalendar.Persistance
                     break;
                 }
                 default:
-                    throw new RecordSkippedException(match.Groups[2].Value);
+                    throw new NotImplementedException();
             }
             
             From = match.Groups[1].Value.Trim();
             Title = match.Groups[3].Value.Trim();
+
+            //TODO: Add real google Id
+            GoodleId = Guid.NewGuid().ToString();
             
             RelatedEmails.Add(email);
         }
+
+        private DateTimeOffset Parse(string dateString, string timeZoneCode)
+        {            
+            Dictionary<string,TimeSpan> timezones = new Dictionary<string, TimeSpan>()
+            {
+                ["ZE5B"] = TimeSpan.FromHours(5) + TimeSpan.FromMinutes(30),
+                ["EDT"] = -TimeSpan.FromHours(4),
+                ["CEDT"] = TimeSpan.FromHours(2),
+            };
+            
+            if(!timezones.ContainsKey(timeZoneCode)) throw new ParsingFailedException(timeZoneCode);
+            
+            try
+            {
+                DateTime date = DateTime.ParseExact(dateString, "MMM d hh:mm tt", CultureInfo.InvariantCulture);
+                DateTimeOffset offset = new DateTimeOffset(date, timezones[timeZoneCode]);
+                return offset;
+            }
+            catch (FormatException)
+            {
+                throw new ParsingFailedException(dateString);
+            }
+        }
         
-        public long Id { get; set; }
-        
+        [Key]
         public string GoodleId { get; set; }
         
         public string Title { get; set; }
@@ -55,7 +82,9 @@ namespace EmailParserForCalendar.Persistance
         public string MiscInformation { get; set; }
         
         public DateTimeOffset EventDate { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
                 
-        public List<ForwardedEmail> RelatedEmails { get; set; } = new List<ForwardedEmail>();
+        public ICollection<ForwardedEmail> RelatedEmails { get; set; } = new List<ForwardedEmail>();
     }
 }

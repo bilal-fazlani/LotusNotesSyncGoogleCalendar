@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using EmailParserForCalendar.Persistance;
 
 namespace EmailParserForCalendar.Migrations
@@ -15,14 +17,14 @@ namespace EmailParserForCalendar.Migrations
 
             modelBuilder.Entity("EmailParserForCalendar.Persistance.CalendarEvent", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<string>("GoodleId")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("CreatedDate");
 
                     b.Property<DateTimeOffset>("EventDate");
 
                     b.Property<string>("From");
-
-                    b.Property<string>("GoodleId");
 
                     b.Property<string>("MiscInformation");
 
@@ -30,7 +32,7 @@ namespace EmailParserForCalendar.Migrations
 
                     b.Property<string>("Title");
 
-                    b.HasKey("Id");
+                    b.HasKey("GoodleId");
 
                     b.ToTable("CalendarEvents");
                 });
@@ -40,7 +42,7 @@ namespace EmailParserForCalendar.Migrations
                     b.Property<string>("GoodleId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long?>("CalendarEventId");
+                    b.Property<string>("CalendarEventGoodleId");
 
                     b.Property<string>("Operation");
 
@@ -50,9 +52,11 @@ namespace EmailParserForCalendar.Migrations
 
                     b.Property<DateTime>("TimeStamp");
 
+                    b.Property<string>("Title");
+
                     b.HasKey("GoodleId");
 
-                    b.HasIndex("CalendarEventId");
+                    b.HasIndex("CalendarEventGoodleId");
 
                     b.ToTable("ForwardedEmails");
                 });
@@ -61,7 +65,7 @@ namespace EmailParserForCalendar.Migrations
                 {
                     b.HasOne("EmailParserForCalendar.Persistance.CalendarEvent")
                         .WithMany("RelatedEmails")
-                        .HasForeignKey("CalendarEventId");
+                        .HasForeignKey("CalendarEventGoodleId");
                 });
         }
     }

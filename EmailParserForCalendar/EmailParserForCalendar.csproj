@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Migrations" />
+    <Folder Include="Migrations" />
     <Folder Include="userCredentials.json" />
   </ItemGroup>
   <ItemGroup>

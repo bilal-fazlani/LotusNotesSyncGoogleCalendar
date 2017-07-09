@@ -18,13 +18,14 @@ namespace EmailParserForCalendar.Persistance
             GoodleId = message.Id;
             Subject = message.Payload.Headers.SingleOrDefault(x => x.Name == "Subject")?.Value;
             TimeStamp = DateTime.Now;
-            SetOperation(Subject);
+            SetOperationAndTitle(Subject);
         }
 
-        private void SetOperation(string subject)
+        private void SetOperationAndTitle(string subject)
         {
             Match match = RegexParser.Parse(subject);
-            Operation = match.Groups[2].Value;
+            Operation = match.Groups[2].Value.Trim();
+            Title = match.Groups[3].Value.Trim();
             Status = Constants.Parsed;
         }
         
@@ -36,6 +37,8 @@ namespace EmailParserForCalendar.Persistance
         public string Subject { get; set; }
         
         public string Operation { get; set; }
+        
+        public string Title { get; set; }
         
         public string Status { get; set; }
     }

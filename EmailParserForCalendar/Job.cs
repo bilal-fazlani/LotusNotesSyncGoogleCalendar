@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using EmailParserForCalendar.EventProcessors;
+using EmailParserForCalendar.EmailProcessing;
 using EmailParserForCalendar.Exceptions;
 using EmailParserForCalendar.Persistance;
 using FluentScheduler;
@@ -13,7 +13,7 @@ namespace EmailParserForCalendar
         public void Execute()
         {
             IEnumerable<Message> messages = GmailClient
-                .GetRecentMessages(null,null,null);
+                .GetRecentMessages("abc",30,30);
            
             using (Database db = new Database())
             {
@@ -28,18 +28,10 @@ namespace EmailParserForCalendar
                         db.ForwardedEmails.Add(email);
                         db.SaveChanges();
 
-                        CalendarEvent calendarEvent = new CalendarEvent(email);
-                        email.Status = Constants.Parsed;
-                        db.SaveChanges();
+                        IEmailProcessor emailProcessor = EmailProcessorFactory.GetEmailProcessor(email.Operation);
+                        emailProcessor.Process(email, db);
 
-                        IEventProcessor eventProcessor = EventProcessorFactory.GetEventProcessor(email.Operation);
-
-                        eventProcessor.Process(calendarEvent);
-                        Console.WriteLine($"Successfully processed - {calendarEvent.Title} from {calendarEvent.From}");
                         email.Status = Constants.Processed;
-                        db.SaveChanges();
-
-                        db.CalendarEvents.Add(calendarEvent);
                         db.SaveChanges();
                     }
                     catch (ParsingFailedException)
@@ -50,7 +42,7 @@ namespace EmailParserForCalendar
                     catch (RecordSkippedException ex)
                     {
                         email.Status = $"{Constants.Skipped}";
-                        Console.WriteLine($"{Constants.Skipped}  - {ex.Message} - {email.Subject}");
+                        Console.WriteLine($"{Constants.Skipped} - {ex.Message}");
                     }
                     catch (Exception ex)
                     {
