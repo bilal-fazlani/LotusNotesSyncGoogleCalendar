@@ -10,10 +10,17 @@ namespace EmailParserForCalendar
 {
     public class Job : IJob
     {
+        private readonly IGmailClient _gmailClient;
+
+        public Job(IGmailClient gmailClient)
+        {
+            _gmailClient = gmailClient;
+        }
+        
         public void Execute()
         {
-            IEnumerable<Message> messages = GmailClient
-                .GetRecentMessages("abc",30,30);
+            IEnumerable<Message> messages = _gmailClient
+                .GetRecentMessages();
            
             using (Database db = new Database())
             {
@@ -28,15 +35,18 @@ namespace EmailParserForCalendar
                         db.ForwardedEmails.Add(email);
                         db.SaveChanges();
 
+                        if(email.Status == Constants.Error)
+                            throw new ParsingFailedException(email.Subject);
+                        
                         IEmailProcessor emailProcessor = EmailProcessorFactory.GetEmailProcessor(email.Operation);
                         emailProcessor.Process(email, db);
 
                         email.Status = Constants.Processed;
                         db.SaveChanges();
+                        Console.WriteLine($"{Constants.Processed} - {email.GoodleId} sucessfully");
                     }
                     catch (ParsingFailedException)
                     {
-                        email.Status = "Error - Subject Parsing failed";
                         Console.Error.WriteLine("An error occued while parsing subject: "+ email.Subject);
                     }
                     catch (RecordSkippedException ex)
@@ -46,15 +56,8 @@ namespace EmailParserForCalendar
                     }
                     catch (Exception ex)
                     {
-                        if (email != null)
-                        {
-                            email.Status = $"{Constants.Error} - {ex.Message}";
-                            Console.Error.WriteLine($"{Constants.Error} - {ex.Message} - {email.Subject}");
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine($"Error: Could not create an instance of type: {typeof(ForwardedEmail).Name}");
-                        }
+                        email.Status = $"{Constants.Error} - {ex.Message}";
+                        Console.Error.WriteLine($"{Constants.Error} - {ex.Message} - {email.Subject}");
                     }
                     finally
                     {

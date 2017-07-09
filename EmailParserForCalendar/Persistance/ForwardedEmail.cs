@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
+using EmailParserForCalendar.Exceptions;
 using Google.Apis.Gmail.v1.Data;
 
 namespace EmailParserForCalendar.Persistance
@@ -23,10 +24,17 @@ namespace EmailParserForCalendar.Persistance
 
         private void SetOperationAndTitle(string subject)
         {
-            Match match = RegexParser.Parse(subject);
-            Operation = match.Groups[2].Value.Trim();
-            Title = match.Groups[3].Value.Trim();
-            Status = Constants.Parsed;
+            try
+            {
+                Match match = RegexParser.Parse(subject);
+                Operation = match.Groups[2].Value.Trim();
+                Title = match.Groups[3].Value.Trim();
+                Status = Constants.Parsed;
+            }
+            catch (ParsingFailedException)
+            {
+                Status = Constants.Error;
+            }
         }
         
         [Key]

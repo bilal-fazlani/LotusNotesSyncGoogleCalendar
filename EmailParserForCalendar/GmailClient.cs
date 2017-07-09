@@ -11,12 +11,18 @@ using Google.Apis.Util.Store;
 
 namespace EmailParserForCalendar
 {
-    public class GmailClient
+    public class GmailClient : IGmailClient
     {
+        private readonly Settings _settings;
+
+        public GmailClient(Settings settings)
+        {
+            _settings = settings;
+        }
+        
         private static readonly GmailService Gmail = CreateGmailInstance();
         private static readonly string[] Scopes = { GmailService.Scope.GmailReadonly };
         private static readonly string ApplicationName = "EmailParserForCalendar";
-        
         
         private static GmailService CreateGmailInstance()
         {
@@ -58,23 +64,30 @@ namespace EmailParserForCalendar
             return message;
         }
         
-        public static IEnumerable<Message> GetRecentMessages(string lotusNotesSourceEmailAddress, long maxMessages = 5, int maxDays = 5)
+        public IEnumerable<Message> GetRecentMessages()
         {
+            int currentIndex = 1;
             IList<Message> messages = null;
 
             try
             {
                 UsersResource.MessagesResource.ListRequest request = Gmail.Users.Messages.List("me");
 
-                request.MaxResults = maxMessages;
+                request.MaxResults = _settings.BatchSize;
 
-                request.Q = $"from:{lotusNotesSourceEmailAddress} newer_than:{maxDays}d";
+                request.Q = $"from:{_settings.From} newer_than:{_settings.MaxNumerOfDaysToFetchEmail}d";
 
                 messages = request.Execute().Messages;
 
-                Console.WriteLine(messages == null
-                    ? "No messages returned from server"
-                    : $"{messages.Count} messages fetched from Google for the last {maxDays} days");
+                if (messages == null)
+                {
+                    Console.WriteLine("No messages returned from server");
+                    yield break;
+                }
+                else
+                {
+                    Console.WriteLine($"{messages.Count} messages fetched from Google for the last {_settings.MaxNumerOfDaysToFetchEmail} days");
+                }
             }
             catch (Exception ex)
             {
@@ -85,6 +98,7 @@ namespace EmailParserForCalendar
             using(Database db = new Database())
                 foreach (var message in messages)
                 {
+                    Console.Write($"{currentIndex++}/{_settings.BatchSize} ");
                     if (db.ForwardedEmails.Find(message.Id) == null)
                     {
                         yield return GetMessage(message.Id);
