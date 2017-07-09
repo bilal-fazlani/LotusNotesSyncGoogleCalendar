@@ -22,13 +22,11 @@ namespace EmailParserForCalendar.Persistance
             {
                 case Constants.Rescheduled:
                 case Constants.Invitation:
-                {
-                    People = match.Groups[4].Value.Trim();
-                    //TODO: extract timezone
-                    EventDate = Parse(match.Groups[5].Value.Trim(), match.Groups[7].Value.Trim());
-                    MiscInformation = match.Groups[8].Value;
+                    People = match.Groups[5].Value.Trim();
+                    if (string.IsNullOrEmpty(match.Groups[6].Value)) throw new NoDateFoundException();
+                    EventDate = Parse(match.Groups[6].Value.Trim(), match.Groups[8].Value.Trim());
+                    MiscInformation = match.Groups[9].Value.Trim();
                     break;
-                }
 
                 case Constants.Cancelled:
                 {

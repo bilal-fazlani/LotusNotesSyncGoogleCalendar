@@ -6,7 +6,7 @@ namespace EmailParserForCalendar.Persistance
     public class RegexParser
     {
         private const string InvitationAndReschedulePattern =
-            @"Forwarded meeting Notice from (.+?): (.+?): (.+?) (\(.*\))?\s*\((.+(PM|AM))\s*(ZE5B|CEDT|EDT)(.*)?";
+            @"Forwarded meeting Notice from (.+?): (.+?): ([^\(]*)(\s*(\(.*\))?\s*\((.+(PM|AM))\s*(ZE5B|CEDT|EDT)\s*(.*)?)?";
 
         private const string ReplyPattern = @"Forwarded meeting Reply from (.+?): (.+?): (.*)";
 

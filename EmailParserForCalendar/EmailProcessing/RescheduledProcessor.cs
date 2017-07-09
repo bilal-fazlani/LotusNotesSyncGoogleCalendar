@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using EmailParserForCalendar.Exceptions;
 using EmailParserForCalendar.Persistance;
 
 namespace EmailParserForCalendar.EmailProcessing
@@ -13,14 +14,26 @@ namespace EmailParserForCalendar.EmailProcessing
 
             if (existingCalendarEvent == null) // it doesnt exist in google, create new
             {
-                CalendarEvent newCalendarEvent = new CalendarEvent(email);
-                db.CalendarEvents.Add(newCalendarEvent);
+                try
+                {
+                    CalendarEvent newCalendarEvent = new CalendarEvent(email);
+                    db.CalendarEvents.Add(newCalendarEvent);
+                }
+                catch (NoDateFoundException){}
             }
             else
             {
-                //TODO: improve this
-                existingCalendarEvent.EventDate = new CalendarEvent(email).EventDate;
-                existingCalendarEvent.RelatedEmails.Add(email);
+                try
+                {
+                    //TODO: improve this
+                    existingCalendarEvent.EventDate = new CalendarEvent(email).EventDate;
+                    existingCalendarEvent.RelatedEmails.Add(email);
+                }
+                catch (NoDateFoundException)
+                {
+                    db.CalendarEvents.Remove(existingCalendarEvent);
+                }
+                
             }
             db.SaveChanges();
         }
