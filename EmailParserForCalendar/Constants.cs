@@ -9,5 +9,6 @@
         public const string Processed = "Processed";
         public const string Error = "Error";
         public const string Skipped = "Skipped";
+        public const string Active = "Active";
     }
 }

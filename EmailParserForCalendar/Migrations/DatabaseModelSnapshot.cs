@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using EmailParserForCalendar.Persistance;
 
 namespace EmailParserForCalendar.Migrations
@@ -27,6 +29,8 @@ namespace EmailParserForCalendar.Migrations
                     b.Property<string>("MiscInformation");
 
                     b.Property<string>("People");
+
+                    b.Property<string>("Status");
 
                     b.Property<string>("Title");
 

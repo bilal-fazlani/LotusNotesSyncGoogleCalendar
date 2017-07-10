@@ -8,7 +8,7 @@ using EmailParserForCalendar.Persistance;
 namespace EmailParserForCalendar.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20170709132703_Initial")]
+    [Migration("20170710150315_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,6 +30,8 @@ namespace EmailParserForCalendar.Migrations
                     b.Property<string>("MiscInformation");
 
                     b.Property<string>("People");
+
+                    b.Property<string>("Status");
 
                     b.Property<string>("Title");
 

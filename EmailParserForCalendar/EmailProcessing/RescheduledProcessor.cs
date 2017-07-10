@@ -27,13 +27,12 @@ namespace EmailParserForCalendar.EmailProcessing
                 {
                     //TODO: improve this
                     existingCalendarEvent.EventDate = new CalendarEvent(email).EventDate;
-                    existingCalendarEvent.RelatedEmails.Add(email);
                 }
                 catch (NoDateFoundException)
                 {
-                    db.CalendarEvents.Remove(existingCalendarEvent);
+                    existingCalendarEvent.Status = Constants.Cancelled;
                 }
-                
+                existingCalendarEvent.RelatedEmails.Add(email);
             }
             db.SaveChanges();
         }

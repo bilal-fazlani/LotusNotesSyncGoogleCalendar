@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace EmailParserForCalendar.Migrations
@@ -17,6 +18,7 @@ namespace EmailParserForCalendar.Migrations
                     From = table.Column<string>(nullable: true),
                     MiscInformation = table.Column<string>(nullable: true),
                     People = table.Column<string>(nullable: true),
+                    Status = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true)
                 },
                 constraints: table =>

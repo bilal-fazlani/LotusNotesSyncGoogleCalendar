@@ -12,8 +12,10 @@ namespace EmailParserForCalendar.EmailProcessing
                 .FirstOrDefault(x => x.Title == email.Title);
 
             if (existingCalendarEvent == null) return;
-
-            db.CalendarEvents.Remove(existingCalendarEvent);
+            
+            existingCalendarEvent.RelatedEmails.Add(email);
+            existingCalendarEvent.Status = Constants.Cancelled;
+            
             db.SaveChanges();
         }
     }

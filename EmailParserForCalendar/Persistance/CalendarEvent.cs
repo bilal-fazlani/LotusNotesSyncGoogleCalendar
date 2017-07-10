@@ -82,6 +82,8 @@ namespace EmailParserForCalendar.Persistance
         public DateTimeOffset EventDate { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        public string Status { get; set; } = Constants.Active;
                 
         public ICollection<ForwardedEmail> RelatedEmails { get; set; } = new List<ForwardedEmail>();
     }
