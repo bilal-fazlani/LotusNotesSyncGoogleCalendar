@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using EmailParserForCalendar.EmailProcessing;
 using EmailParserForCalendar.Exceptions;
+using EmailParserForCalendar.Google;
 using EmailParserForCalendar.Persistance;
 using FluentScheduler;
 using Google.Apis.Gmail.v1.Data;
 
-namespace EmailParserForCalendar
+namespace EmailParserForCalendar.Job
 {
-    public class Job : IJob
+    public class CalendarSyncJob : IJob
     {
         private readonly IGmailClient _gmailClient;
 
-        public Job(IGmailClient gmailClient)
+        public CalendarSyncJob(IGmailClient gmailClient)
         {
             _gmailClient = gmailClient;
         }

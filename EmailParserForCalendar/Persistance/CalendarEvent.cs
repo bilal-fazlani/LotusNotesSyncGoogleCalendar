@@ -16,7 +16,7 @@ namespace EmailParserForCalendar.Persistance
                 
         public CalendarEvent(ForwardedEmail email)
         {
-            Match match = RegexParser.Parse(email.Subject);
+            Match match = SujectLineParser.Parse(email.Subject);
 
             switch (match.Groups[2].Value)
             {

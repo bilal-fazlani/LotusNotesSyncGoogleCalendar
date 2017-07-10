@@ -26,7 +26,7 @@ namespace EmailParserForCalendar.Persistance
         {
             try
             {
-                Match match = RegexParser.Parse(subject);
+                Match match = SujectLineParser.Parse(subject);
                 Operation = match.Groups[2].Value.Trim();
                 Title = match.Groups[3].Value.Trim();
                 Status = Constants.Parsed;

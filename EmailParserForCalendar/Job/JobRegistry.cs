@@ -1,12 +1,12 @@
 ﻿using FluentScheduler;
 
-namespace EmailParserForCalendar
+namespace EmailParserForCalendar.Job
 {
     public class JobRegistry : Registry
     {
         public JobRegistry(int hours)
         {
-            Schedule<Job>().ToRunNow().AndEvery(hours).Hours();
+            Schedule<CalendarSyncJob>().ToRunNow().AndEvery(hours).Hours();
         }
     }
 }

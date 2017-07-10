@@ -1,9 +1,9 @@
 ﻿using System.Text.RegularExpressions;
 using EmailParserForCalendar.Exceptions;
 
-namespace EmailParserForCalendar.Persistance
+namespace EmailParserForCalendar
 {
-    public class RegexParser
+    public class SujectLineParser
     {
         private const string InvitationAndReschedulePattern =
             @"Forwarded meeting Notice from (.+?): (.+?): ([^\(]*)(\s*(\(.*\))?\s*\((.+(PM|AM))\s*(ZE5B|CEDT|EDT)\s*(.*)?)?";

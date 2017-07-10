@@ -1,4 +1,6 @@
 ﻿using System;
+using EmailParserForCalendar.Google;
+using EmailParserForCalendar.Job;
 using FluentScheduler;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +23,7 @@ namespace EmailParserForCalendar
                 var serviceProvider = new ServiceCollection()
                     .AddSingleton(sp => settings)
                     .AddSingleton<IGmailClient, GmailClient>()
-                    .AddSingleton(sp=> new Job(sp.GetService<IGmailClient>()))
+                    .AddSingleton(sp=> new CalendarSyncJob(sp.GetService<IGmailClient>()))
                     .BuildServiceProvider();
                
                 JobManager.JobFactory = new JobFactory(serviceProvider);

@@ -2,7 +2,7 @@
 using FluentScheduler;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EmailParserForCalendar
+namespace EmailParserForCalendar.Job
 {
     public class JobFactory : IJobFactory
     {
