@@ -27,6 +27,7 @@ namespace EmailParserForCalendar.EmailProcessing
                 {
                     //TODO: improve this
                     existingCalendarEvent.EventDate = new CalendarEvent(email).EventDate;
+                    existingCalendarEvent.Status = Constants.Active;
                 }
                 catch (NoDateFoundException)
                 {

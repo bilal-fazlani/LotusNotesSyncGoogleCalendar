@@ -32,10 +32,11 @@ namespace EmailParserForCalendar.Migrations
                 {
                     GoodleId = table.Column<string>(nullable: false),
                     CalendarEventGoodleId = table.Column<string>(nullable: true),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    EmailDate = table.Column<DateTime>(nullable: true),
                     Operation = table.Column<string>(nullable: true),
                     Status = table.Column<string>(nullable: true),
                     Subject = table.Column<string>(nullable: true),
-                    TimeStamp = table.Column<DateTime>(nullable: false),
                     Title = table.Column<string>(nullable: true)
                 },
                 constraints: table =>

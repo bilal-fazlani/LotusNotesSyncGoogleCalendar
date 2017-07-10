@@ -46,13 +46,15 @@ namespace EmailParserForCalendar.Migrations
 
                     b.Property<string>("CalendarEventGoodleId");
 
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<DateTime?>("EmailDate");
+
                     b.Property<string>("Operation");
 
                     b.Property<string>("Status");
 
                     b.Property<string>("Subject");
-
-                    b.Property<DateTime>("TimeStamp");
 
                     b.Property<string>("Title");
 

@@ -18,8 +18,8 @@ namespace EmailParserForCalendar.Persistance
         {
             GoodleId = message.Id;
             Subject = message.Payload.Headers.SingleOrDefault(x => x.Name == "Subject")?.Value;
-            TimeStamp = DateTime.Now;
             SetOperationAndTitle(Subject);
+            EmailDate = message.InternalDate.FromEpochMs();
         }
 
         private void SetOperationAndTitle(string subject)
@@ -40,7 +40,9 @@ namespace EmailParserForCalendar.Persistance
         [Key]
         public string GoodleId { get; set; }
         
-        public DateTime TimeStamp { get; set; }
+        public DateTime? EmailDate { get; set; }
+        
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
         
         public string Subject { get; set; }
         
