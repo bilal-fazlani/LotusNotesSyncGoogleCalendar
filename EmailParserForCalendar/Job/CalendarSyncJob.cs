@@ -11,9 +11,9 @@ namespace EmailParserForCalendar.Job
 {
     public class CalendarSyncJob : IJob
     {
-        private readonly IGmailClient _gmailClient;
+        private readonly GmailClient _gmailClient;
 
-        public CalendarSyncJob(IGmailClient gmailClient)
+        public CalendarSyncJob(GmailClient gmailClient)
         {
             _gmailClient = gmailClient;
         }

@@ -2,6 +2,7 @@
 using EmailParserForCalendar.Google;
 using EmailParserForCalendar.Job;
 using FluentScheduler;
+using Google.Apis.Gmail.v1;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -22,8 +23,12 @@ namespace EmailParserForCalendar
                 //setup our DI
                 var serviceProvider = new ServiceCollection()
                     .AddSingleton(sp => settings)
-                    .AddSingleton<IGmailClient, GmailClient>()
-                    .AddSingleton(sp=> new CalendarSyncJob(sp.GetService<IGmailClient>()))
+                    .AddSingleton(GoogleServiceFactory.CreateGmailService())
+                    .AddSingleton<GmailClient>()
+                    .AddSingleton<CalendarClient>()
+                    .AddSingleton(GoogleServiceFactory.CreateGmailService())
+                    .AddSingleton(GoogleServiceFactory.CreateCalendarService())
+                    .AddSingleton(sp=> new CalendarSyncJob(sp.GetService<GmailClient>()))
                     .BuildServiceProvider();
                
                 JobManager.JobFactory = new JobFactory(serviceProvider);
