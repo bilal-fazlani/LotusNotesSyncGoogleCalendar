@@ -58,7 +58,7 @@ namespace EmailParserForCalendar.Google
             using(Database db = new Database())
                 foreach (var message in messages)
                 {
-                    Console.Write($"{currentIndex++}/{_settings.BatchSize} ");
+                    Console.Write($"{currentIndex++}/{messages.Count} ");
                     if (db.ForwardedEmails.Find(message.Id) == null)
                     {
                         yield return GetMessage(message.Id);

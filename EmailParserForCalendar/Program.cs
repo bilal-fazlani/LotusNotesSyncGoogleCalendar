@@ -1,4 +1,5 @@
 ﻿using System;
+using EmailParserForCalendar.EmailProcessing;
 using EmailParserForCalendar.Google;
 using EmailParserForCalendar.Job;
 using FluentScheduler;
@@ -22,13 +23,14 @@ namespace EmailParserForCalendar
 
                 //setup our DI
                 var serviceProvider = new ServiceCollection()
+                    .AddSingleton<EmailProcessorFactory>()
                     .AddSingleton(sp => settings)
                     .AddSingleton(GoogleServiceFactory.CreateGmailService())
                     .AddSingleton<GmailClient>()
                     .AddSingleton<CalendarClient>()
                     .AddSingleton(GoogleServiceFactory.CreateGmailService())
                     .AddSingleton(GoogleServiceFactory.CreateCalendarService())
-                    .AddSingleton(sp=> new CalendarSyncJob(sp.GetService<GmailClient>()))
+                    .AddSingleton(sp=> new CalendarSyncJob(sp.GetService<GmailClient>(), sp.GetService<EmailProcessorFactory>()))
                     .BuildServiceProvider();
                
                 JobManager.JobFactory = new JobFactory(serviceProvider);

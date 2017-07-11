@@ -1,20 +1,26 @@
 ﻿using System.Collections.Generic;
+using EmailParserForCalendar.Google;
 
 namespace EmailParserForCalendar.EmailProcessing
 {
     public class EmailProcessorFactory
     {
-        private static readonly Dictionary<string, IEmailProcessor> Processors = new Dictionary<string, IEmailProcessor>
+        private readonly Dictionary<string, IEmailProcessor> _processors;
+
+        public EmailProcessorFactory(CalendarClient calendarClient)
         {
-            [Constants.Invitation] = new InvitationProcessor(),
-            [Constants.Rescheduled] = new RescheduledProcessor(),
-            [Constants.Cancelled] = new CancelledProcessor()
-        };
+            _processors = new Dictionary<string, IEmailProcessor>
+            {
+                [Constants.Invitation] = new InvitationProcessor(calendarClient),
+                [Constants.Rescheduled] = new RescheduledProcessor(),
+                [Constants.Cancelled] = new CancelledProcessor()
+            };
+        }
         
-        public static IEmailProcessor GetEmailProcessor(string operation)
+        public IEmailProcessor GetEmailProcessor(string operation)
         {
             IEmailProcessor emailProcessor = null;
-            Processors.TryGetValue(operation, out emailProcessor);
+            _processors.TryGetValue(operation, out emailProcessor);
 
             return emailProcessor ?? new NoImplementationProcessor();
         }

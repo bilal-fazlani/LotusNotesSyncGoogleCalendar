@@ -11,43 +11,51 @@ namespace EmailParserForCalendar.Google
 {
     public class GoogleServiceFactory
     {
-        private static readonly UserCredential Credential = CreateCredential();
         private static readonly string ApplicationName = "EmailParserForCalendar";
-        private static readonly BaseClientService.Initializer Initializer = new BaseClientService.Initializer
+
+        private static BaseClientService.Initializer CreateInitialiser(string scope)
         {
-            HttpClientInitializer = Credential,
-            ApplicationName = ApplicationName
-        };
+            BaseClientService.Initializer initializer = new BaseClientService.Initializer
+            {
+                HttpClientInitializer = CreateCredential(scope),
+                ApplicationName = ApplicationName
+            };
+            return initializer;
+        }
         
-        private static readonly string[] Scopes = { GmailService.Scope.GmailReadonly };
-        
-        private static UserCredential CreateCredential()
-        {
+        private static UserCredential CreateCredential(string scope)
+        {   
             UserCredential credential;
 
-            using (FileStream stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.Read))
+            using (FileStream stream = new FileStream("auth/credentials.client.json", FileMode.Open, FileAccess.Read))
             {
-                string credPath = "userCredentials.json";
+                string credPath = MakeCredPath(scope);
 
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
-                    Scopes,
+                    new[]{scope},
                     "user",
                     CancellationToken.None,
                     new FileDataStore(credPath, true)).Result;
-                Console.WriteLine("Credential file saved to: " + credPath);
             }
+            
             return credential;
         }
         
         public static GmailService CreateGmailService()
         {
-            return new GmailService(Initializer);
+            return new GmailService(CreateInitialiser(GmailService.Scope.GmailReadonly));
         }
         
         public static CalendarService CreateCalendarService()
         {
-            return new CalendarService(Initializer);
+            return new CalendarService(CreateInitialiser(CalendarService.Scope.Calendar));
+        }
+
+        private static string MakeCredPath(string scope)
+        {
+            int lastIndex = scope.LastIndexOf(@"/", StringComparison.Ordinal);
+            return "auth/credentials."+scope.Substring(lastIndex + 1);
         }
     }
 }

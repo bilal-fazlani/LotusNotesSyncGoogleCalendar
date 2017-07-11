@@ -38,9 +38,6 @@ namespace EmailParserForCalendar.Persistance
             
             From = match.Groups[1].Value.Trim();
             Title = match.Groups[3].Value.Trim();
-
-            //TODO: Add real google Id
-            GoodleId = Guid.NewGuid().ToString();
             
             RelatedEmails.Add(email);
         }

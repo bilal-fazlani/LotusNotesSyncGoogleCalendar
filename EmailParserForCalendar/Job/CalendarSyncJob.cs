@@ -12,10 +12,12 @@ namespace EmailParserForCalendar.Job
     public class CalendarSyncJob : IJob
     {
         private readonly GmailClient _gmailClient;
+        private readonly EmailProcessorFactory _emailProcessorFactory;
 
-        public CalendarSyncJob(GmailClient gmailClient)
+        public CalendarSyncJob(GmailClient gmailClient, EmailProcessorFactory emailProcessorFactory)
         {
             _gmailClient = gmailClient;
+            _emailProcessorFactory = emailProcessorFactory;
         }
         
         public void Execute()
@@ -39,7 +41,7 @@ namespace EmailParserForCalendar.Job
                         if(email.Status == Constants.Error)
                             throw new ParsingFailedException(email.Subject);
                         
-                        IEmailProcessor emailProcessor = EmailProcessorFactory.GetEmailProcessor(email.Operation);
+                        IEmailProcessor emailProcessor = _emailProcessorFactory.GetEmailProcessor(email.Operation);
                         emailProcessor.Process(email, db);
 
                         email.Status = Constants.Processed;
