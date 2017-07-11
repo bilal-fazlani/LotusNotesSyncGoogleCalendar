@@ -12,8 +12,8 @@ namespace EmailParserForCalendar.EmailProcessing
             _processors = new Dictionary<string, IEmailProcessor>
             {
                 [Constants.Invitation] = new InvitationProcessor(calendarClient),
-                [Constants.Rescheduled] = new RescheduledProcessor(),
-                [Constants.Cancelled] = new CancelledProcessor()
+                [Constants.Rescheduled] = new RescheduledProcessor(calendarClient),
+                [Constants.Cancelled] = new CancelledProcessor(calendarClient)
             };
         }
         

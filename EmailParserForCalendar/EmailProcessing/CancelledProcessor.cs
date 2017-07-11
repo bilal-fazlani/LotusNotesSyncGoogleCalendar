@@ -1,10 +1,18 @@
 ﻿using System.Linq;
+using EmailParserForCalendar.Google;
 using EmailParserForCalendar.Persistance;
 
 namespace EmailParserForCalendar.EmailProcessing
 {
     public class CancelledProcessor : IEmailProcessor
     {
+        private readonly CalendarClient _calendarClient;
+
+        public CancelledProcessor(CalendarClient calendarClient)
+        {
+            _calendarClient = calendarClient;
+        }
+        
         public void Process(ForwardedEmail email, Database db)
         {
             CalendarEvent existingCalendarEvent = db.CalendarEvents
@@ -17,6 +25,9 @@ namespace EmailParserForCalendar.EmailProcessing
             existingCalendarEvent.Status = Constants.Cancelled;
             
             db.SaveChanges();
+
+
+            _calendarClient.CancelEvent(existingCalendarEvent.GoodleId);
         }
     }
 }

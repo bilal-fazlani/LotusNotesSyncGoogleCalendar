@@ -1,4 +1,5 @@
 ﻿using System;
+using Google.Apis.Calendar.v3.Data;
 
 namespace EmailParserForCalendar
 {
@@ -9,6 +10,15 @@ namespace EmailParserForCalendar
             if (!time.HasValue) return null;
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return epoch.AddMilliseconds(time.Value).ToLocalTime();
+        }
+
+        public static EventDateTime ToEventDateTime(this DateTimeOffset value)
+        {
+            return new EventDateTime
+            {
+                DateTime = value.DateTime,
+                TimeZone = String.Format("{0:zzz}", value)
+            };
         }
     }
 }

@@ -39,16 +39,8 @@ namespace EmailParserForCalendar.Google
                 {
                     UseDefault = true
                 },
-                Start = new EventDateTime
-                {
-                    DateTime = calendarEvent.EventDate.DateTime,
-                    TimeZone = String.Format("{0:zzz}",calendarEvent.EventDate)
-                },
-                End = new EventDateTime
-                {
-                    DateTime = calendarEvent.EventDate.DateTime + TimeSpan.FromMinutes(30),
-                    TimeZone = String.Format("{0:zzz}",calendarEvent.EventDate)
-                }
+                Start = calendarEvent.EventDate.ToEventDateTime(),
+                End =  (calendarEvent.EventDate + TimeSpan.FromMinutes(30)).ToEventDateTime()
             };
             var insertRequest = _calendarService.Events.Insert(googleEvent, _emailAddress);
             return insertRequest.Execute();
@@ -56,12 +48,23 @@ namespace EmailParserForCalendar.Google
 
         public void ReScheduleEvent(string id, DateTimeOffset date)
         {
-            
+            _calendarService.Events.Patch(new Event
+            {
+                Id = id,
+                Start = date.ToEventDateTime(),
+                End =  (date + TimeSpan.FromMinutes(30)).ToEventDateTime()
+            }, _emailAddress, id);
         }
 
-        public void CancelEvent(string id)
+        public Event CancelEvent(string id)
         {
-            
+            Event cancelledEvent = _calendarService.Events.Patch(new Event
+            {
+                Id = id,
+                Status = "cancelled"
+            }, _emailAddress, id).Execute();
+
+            return cancelledEvent;
         }
     }
 }
