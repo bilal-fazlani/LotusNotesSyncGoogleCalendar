@@ -3,10 +3,9 @@ using EmailParserForCalendar.EmailProcessing;
 using EmailParserForCalendar.Google;
 using EmailParserForCalendar.Job;
 using FluentScheduler;
-using Google.Apis.Gmail.v1;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+using Serilog;
 
 namespace EmailParserForCalendar
 {
@@ -19,8 +18,16 @@ namespace EmailParserForCalendar
         {
             try
             {
+                ILogger logger = new LoggerConfiguration()
+                    .MinimumLevel.Verbose()
+                    .WriteTo.LiterateConsole()
+                    .WriteTo.RollingFile("logs/log.txt")
+                    .CreateLogger();
+                
                 Settings settings = LoadSettings(args);
-
+                
+                logger.Verbose("{@settings}", settings);
+                
                 //setup our DI
                 var serviceProvider = new ServiceCollection()
                     .AddSingleton<EmailProcessorFactory>()
@@ -30,13 +37,17 @@ namespace EmailParserForCalendar
                     .AddSingleton<CalendarClient>()
                     .AddSingleton(GoogleServiceFactory.CreateGmailService())
                     .AddSingleton(GoogleServiceFactory.CreateCalendarService())
-                    .AddSingleton(sp=> new CalendarSyncJob(sp.GetService<GmailClient>(), sp.GetService<EmailProcessorFactory>()))
+                    .AddSingleton(logger)
+                    .AddSingleton(sp=> new CalendarSyncJob(
+                        sp.GetService<GmailClient>(), 
+                        sp.GetService<EmailProcessorFactory>(),
+                        sp.GetService<ILogger>()))
                     .BuildServiceProvider();
                
                 JobManager.JobFactory = new JobFactory(serviceProvider);
-                JobManager.JobException += (log) => Console.Error.WriteLine("Error: " +
-                                                                            $" {log.Exception.Message}\n\n" +
-                                                                            $"{log.Exception.StackTrace}");
+                JobManager.JobException += (log) => logger.Error(log.Exception, "{message} \n\n\n {stackTrace}",
+                    log.Exception.Message, log.Exception.StackTrace);
+                
                 JobManager.Initialize(new JobRegistry(settings.FetchIntervalInHours));                 
             }
             catch (Exception ex)
@@ -57,7 +68,6 @@ namespace EmailParserForCalendar
 
             Settings settings = new Settings();
             config.Bind(settings);
-            Console.WriteLine(JsonConvert.SerializeObject(settings, Formatting.Indented));
             return settings;
         }
     }

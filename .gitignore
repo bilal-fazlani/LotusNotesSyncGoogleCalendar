@@ -5,3 +5,5 @@
 **/obj
 *.iml
 **/.idea/
+**/logs/
+**/Migrations/

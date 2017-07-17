@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EmailParserForCalendar.Persistance;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Gmail.v1.Data;
+using Serilog;
 
 namespace EmailParserForCalendar.Google
 {
@@ -10,11 +11,13 @@ namespace EmailParserForCalendar.Google
     {
         private readonly Settings _settings;
         private readonly GmailService _gmailService;
+        private readonly ILogger _logger;
 
-        public GmailClient(Settings settings, GmailService gmailService)
+        public GmailClient(Settings settings, GmailService gmailService, ILogger logger)
         {
             _settings = settings;
             _gmailService = gmailService;
+            _logger = logger;
         }
         
         private Message GetMessage(string messageId)
@@ -41,31 +44,36 @@ namespace EmailParserForCalendar.Google
 
                 if (messages == null)
                 {
-                    Console.WriteLine("No messages returned from server");
+                    _logger.Warning("No messages returned from server");
                     yield break;
                 }
                 else
                 {
-                    Console.WriteLine($"{messages.Count} messages fetched from Google for the last {_settings.MaxNumerOfDaysToFetchEmail} days");
+                    _logger.Information("{messagesCount} messages fetched from Google " +
+                                        "for the last {maxDays} days",
+                        messages.Count, _settings.MaxNumerOfDaysToFetchEmail);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                _logger.Error(ex ,"{errorMessage}", ex.Message);
                 yield break;
             }
 
             using(Database db = new Database())
                 foreach (var message in messages)
                 {
-                    Console.Write($"{currentIndex++}/{messages.Count} ");
-                    if (db.ForwardedEmails.Find(message.Id) == null)
+                    _logger.Verbose("Processing {currentIndex}/{messageCount}",currentIndex++, messages.Count);
+
+                    var email = db.ForwardedEmails.Find(message.Id);
+                    if (email == null)
                     {
                         yield return GetMessage(message.Id);
                     }
                     else
                     {
-                        Console.WriteLine($"{message.Id} was already attempted/processed");
+                        _logger.Warning("{messageId} was already attempted/processed", message.Id);
+                        _logger.Debug("{subject}", email.Subject);
                     }
                 }
         }

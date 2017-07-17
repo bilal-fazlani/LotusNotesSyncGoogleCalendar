@@ -6,6 +6,7 @@ using EmailParserForCalendar.Google;
 using EmailParserForCalendar.Persistance;
 using FluentScheduler;
 using Google.Apis.Gmail.v1.Data;
+using Serilog;
 
 namespace EmailParserForCalendar.Job
 {
@@ -13,15 +14,18 @@ namespace EmailParserForCalendar.Job
     {
         private readonly GmailClient _gmailClient;
         private readonly EmailProcessorFactory _emailProcessorFactory;
+        private readonly ILogger _logger;
 
-        public CalendarSyncJob(GmailClient gmailClient, EmailProcessorFactory emailProcessorFactory)
+        public CalendarSyncJob(GmailClient gmailClient, EmailProcessorFactory emailProcessorFactory,
+            ILogger logger)
         {
             _gmailClient = gmailClient;
             _emailProcessorFactory = emailProcessorFactory;
+            _logger = logger;
         }
         
         public void Execute()
-        {
+        {            
             IEnumerable<Message> messages = _gmailClient
                 .GetRecentMessages();
            
@@ -46,21 +50,22 @@ namespace EmailParserForCalendar.Job
 
                         email.Status = Constants.Processed;
                         db.SaveChanges();
-                        Console.WriteLine($"{Constants.Processed} - {email.GoodleId} sucessfully");
+                        _logger.Information($"{Constants.Processed} - {{GoodleId}} sucessfully", email.GoodleId);
                     }
-                    catch (ParsingFailedException)
+                    catch (ParsingFailedException ex)
                     {
-                        Console.Error.WriteLine("An error occued while parsing subject: "+ email.Subject);
+                        _logger.Error(ex, "An error occued while parsing subject: {subject}", email.Subject);
                     }
                     catch (RecordSkippedException ex)
                     {
                         email.Status = $"{Constants.Skipped}";
-                        Console.WriteLine($"{Constants.Skipped} - {ex.Message}");
+                        _logger.Warning(ex, $"{Constants.Skipped} - {{message}}", ex.Message);
+                        _logger.Verbose("{subject}", email.Subject);
                     }
                     catch (Exception ex)
                     {
                         email.Status = $"{Constants.Error} - {ex.Message}";
-                        Console.Error.WriteLine($"{Constants.Error} - {ex.Message} - {email.Subject}");
+                        _logger.Error(ex, "{message} - {subject}", ex.Message, email.Subject);
                     }
                     finally
                     {
@@ -70,7 +75,7 @@ namespace EmailParserForCalendar.Job
                         }
                         catch
                         {
-                            Console.Error.WriteLine($"Could not save to database");
+                            _logger.Error("Could not save to database");
                         }
                     }
                 }
